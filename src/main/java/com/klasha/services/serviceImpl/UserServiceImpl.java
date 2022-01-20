@@ -1,13 +1,16 @@
 package com.klasha.services.serviceImpl;
 
+import com.klasha.dtos.LoginDto;
 import com.klasha.dtos.SignupDto;
 import com.klasha.exceptions.CustomAppException;
+import com.klasha.exceptions.UserNotFoundException;
 import com.klasha.models.User;
 import com.klasha.repositories.UserRepository;
 import com.klasha.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpSession;
 import java.util.Optional;
 
 @Service
@@ -28,5 +31,20 @@ public class UserServiceImpl implements UserService {
         user.setPassword(signupDto.getPassword());
         userRepository.save(user);
         return "User Registered Successfully";
+    }
+
+    @Override
+    public String login(LoginDto loginDto, HttpSession httpSession) {
+        Optional<User> existingUser = userRepository.findUserByEmail(loginDto.getEmail());
+        if (existingUser.isPresent()) {
+            User loggedInUser = (User) httpSession.getAttribute(existingUser.get().getEmail());
+            if (loggedInUser != null) {
+                return "Welcome Back";
+            } else {
+                httpSession.setAttribute(existingUser.get().getEmail(), existingUser);
+                return "User login Successfully";
+            }
+        }
+        throw new UserNotFoundException("User not Found");
     }
 }
