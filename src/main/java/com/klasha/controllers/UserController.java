@@ -1,9 +1,12 @@
 package com.klasha.controllers;
 
 import com.klasha.dtos.DeliveryDto;
+import com.klasha.dtos.LocationDto;
 import com.klasha.dtos.LoginDto;
 import com.klasha.dtos.SignupDto;
 import com.klasha.models.Delivery;
+import com.klasha.models.Location;
+import com.klasha.responses.DeliveryResponse;
 import com.klasha.responses.HttpResponse;
 import com.klasha.services.DeliveryService;
 import com.klasha.services.UserService;
@@ -62,5 +65,10 @@ public class UserController {
     @GetMapping("/view-locations")
     public List<Delivery> viewLocations() {
         return deliveryService.viewLocations();
+    }
+
+    @PostMapping("/route-and-cost")
+    public DeliveryResponse optimalRouteAndDeliveryCost(@RequestBody LocationDto locationDto) {
+        return deliveryService.optimalRouteAndDeliveryCost(locationDto);
     }
 }
