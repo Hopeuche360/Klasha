@@ -1,6 +1,5 @@
 package com.klasha.services.serviceImpl;
 
-import com.klasha.dtos.DeliveryDto;
 import com.klasha.dtos.LocationDto;
 import com.klasha.dtos.LoginDto;
 import com.klasha.dtos.SignupDto;
@@ -47,57 +46,50 @@ public class UserServiceImpl implements UserService, DeliveryService {
 
     @Override
     public String login(LoginDto loginDto, HttpSession httpSession) {
-        Optional<User> existingUser = findUser(loginDto.getEmail());
-        User loggedInUser = (User) httpSession.getAttribute(existingUser.get().getEmail());
-        if (loggedInUser != null) {
-            return "Welcome Back";
-        } else {
-            httpSession.setAttribute(loginDto.getEmail(), existingUser.get());
-            return "User login Successfully";
-        }
+        User user = userRepository.findUserByEmailAndPassword(loginDto.getEmail(), loginDto.getPassword())
+                .orElseThrow(() -> new CustomAppException("Incorrect email or password"));
+        httpSession.setAttribute("user", user);
+        return "User login Successfully";
     }
 
     @Override
-    public String addLocation(DeliveryDto deliveryDto, HttpSession httpSession) {
-        Delivery delivery = new Delivery();
-        findUser(deliveryDto.getEmail());
-        User loggedInUser = (User) httpSession.getAttribute(deliveryDto.getEmail());
+    public String addDeliveryLocation(String address, HttpSession httpSession) {
+        User loggedInUser = (User) httpSession.getAttribute("user");
         if (loggedInUser != null) {
-            delivery.setAddress(deliveryDto.getAddress());
+            Delivery delivery = new Delivery();
+            delivery.setAddress(address);
             delivery.setUser(loggedInUser);
             deliveryRepository.save(delivery);
             return "Location added Successfully";
-        } else return USER_NOT_CURRENTLY_LOGGED_IN;
+        } else throw new CustomAppException(USER_NOT_CURRENTLY_LOGGED_IN);
     }
 
     @Override
-    public String updateLocation(long deliveryId, DeliveryDto deliveryDto, HttpSession httpSession) {
-        Delivery existingDelivery = deliveryRepository.findById(deliveryId).orElseThrow(
-                ()-> new CustomAppException("Resource not Found"));
-        User loggedInUser = (User) httpSession.getAttribute(deliveryDto.getEmail());
+    public String updateDeliveryLocation(long deliveryId, String address, HttpSession httpSession) {
+        User loggedInUser = (User) httpSession.getAttribute("user");
         if (loggedInUser != null) {
-            existingDelivery.setUser(loggedInUser);
-            existingDelivery.setAddress(deliveryDto.getAddress());
+            Delivery existingDelivery = deliveryRepository.findByIdAndUser(deliveryId, loggedInUser).orElseThrow(
+                    ()-> new CustomAppException("Resource not Found"));
+            existingDelivery.setAddress(address);
             deliveryRepository.save(existingDelivery);
             return "Location updated successfully";
-        } else return USER_NOT_CURRENTLY_LOGGED_IN;
+        } else throw new CustomAppException(USER_NOT_CURRENTLY_LOGGED_IN);
     }
 
     @Override
     public String removeLocation(long deliveryId, HttpSession httpSession) {
-        Delivery existingDelivery = deliveryRepository.findById(deliveryId).orElseThrow(
-                ()-> new CustomAppException("Resource not Found"));
-        User loggedInUser = (User) httpSession.getAttribute(existingDelivery.getUser().getEmail());
+        User loggedInUser = (User) httpSession.getAttribute("user");
         if (loggedInUser != null) {
+            Delivery existingDelivery = deliveryRepository.findByIdAndUser(deliveryId, loggedInUser).orElseThrow(
+                    ()-> new CustomAppException("Resource not Found"));
             deliveryRepository.delete(existingDelivery);
             return "Location removed successfully";
-        }
-        return USER_NOT_CURRENTLY_LOGGED_IN;
+        } else throw new CustomAppException(USER_NOT_CURRENTLY_LOGGED_IN);
     }
 
     @Override
     public List<Delivery> viewLocations() {
-        return (List<Delivery>) deliveryRepository.findAll();
+        return deliveryRepository.findAll();
     }
 
     @Override

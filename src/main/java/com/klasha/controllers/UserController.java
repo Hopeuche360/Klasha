@@ -5,7 +5,6 @@ import com.klasha.dtos.LocationDto;
 import com.klasha.dtos.LoginDto;
 import com.klasha.dtos.SignupDto;
 import com.klasha.models.Delivery;
-import com.klasha.models.Location;
 import com.klasha.responses.DeliveryResponse;
 import com.klasha.responses.HttpResponse;
 import com.klasha.services.DeliveryService;
@@ -46,14 +45,14 @@ public class UserController {
     }
 
     @PostMapping("/add-location")
-    public ResponseEntity<HttpResponse> addLocation(@RequestBody DeliveryDto deliveryDto, HttpSession httpSession) {
-        return response(CREATED, deliveryService.addLocation(deliveryDto, httpSession));
+    public ResponseEntity<HttpResponse> addLocation(@RequestParam String address, HttpSession httpSession) {
+        return response(CREATED, deliveryService.addDeliveryLocation(address, httpSession));
     }
 
     @PutMapping("/update-location/{deliveryId}")
     public ResponseEntity<HttpResponse> updateLocation(@PathVariable long deliveryId,
-                                                       @RequestBody DeliveryDto deliveryDto, HttpSession httpSession) {
-        return response(OK, deliveryService.updateLocation(deliveryId, deliveryDto, httpSession));
+                                                       @RequestParam String address, HttpSession httpSession) {
+        return response(OK, deliveryService.updateDeliveryLocation(deliveryId, address, httpSession));
     }
 
     @DeleteMapping("/remove-location/{deliveryId}")
