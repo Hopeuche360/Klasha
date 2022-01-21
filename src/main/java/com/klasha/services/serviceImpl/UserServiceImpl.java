@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -95,5 +96,9 @@ public class UserServiceImpl implements UserService, DeliveryService {
         return "User not currently logged in";
     }
 
+    @Override
+    public List<Delivery> viewLocations() {
+        return (List<Delivery>) deliveryRepository.findAll();
+    }
 
 }
