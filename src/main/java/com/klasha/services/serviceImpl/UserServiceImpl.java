@@ -79,8 +79,20 @@ public class UserServiceImpl implements UserService, DeliveryService {
             existingDelivery.setAddress(deliveryDto.getAddress());
             deliveryRepository.save(existingDelivery);
             return "Location updated successfully";
-        } else return "User not currently logged in";
+        }
+        return "User not currently logged in";
+    }
 
+    @Override
+    public String removeLocation(long deliveryId, HttpSession httpSession) {
+        Delivery existingDelivery = deliveryRepository.findById(deliveryId).orElseThrow(
+                ()-> new CustomAppException("Resource not Found"));
+        User loggedInUser = (User) httpSession.getAttribute(existingDelivery.getUser().getEmail());
+        if (loggedInUser != null) {
+            deliveryRepository.delete(existingDelivery);
+            return "Location removed successfully";
+        }
+        return "User not currently logged in";
     }
 
 

@@ -50,4 +50,10 @@ public class UserController {
                                                        @RequestBody DeliveryDto deliveryDto, HttpSession httpSession) {
         return response(OK, deliveryService.updateLocation(deliveryId, deliveryDto, httpSession));
     }
+
+    @DeleteMapping("/remove-location/{deliveryId}")
+    public ResponseEntity<HttpResponse> removeLocation(@PathVariable long deliveryId,
+                                                       HttpSession httpSession) {
+        return response(OK, deliveryService.removeLocation(deliveryId, httpSession));
+    }
 }
