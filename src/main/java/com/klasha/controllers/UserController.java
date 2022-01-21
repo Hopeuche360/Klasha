@@ -1,16 +1,16 @@
 package com.klasha.controllers;
 
+import com.klasha.dtos.DeliveryDto;
 import com.klasha.dtos.LoginDto;
 import com.klasha.dtos.SignupDto;
+import com.klasha.models.Delivery;
 import com.klasha.responses.HttpResponse;
+import com.klasha.services.DeliveryService;
 import com.klasha.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 
@@ -21,7 +21,8 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UserController {
-    public final UserService userService;
+    private final UserService userService;
+    private final DeliveryService deliveryService;
 
     protected static ResponseEntity<HttpResponse> response(HttpStatus httpStatus, String message) {
         return new  ResponseEntity<>(new HttpResponse(httpStatus.value(),
@@ -36,6 +37,17 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<HttpResponse> login(@RequestBody LoginDto loginDto, HttpSession httpSession) {
-        return  response(OK, userService.login(loginDto, httpSession));
+        return response(OK, userService.login(loginDto, httpSession));
+    }
+
+    @PostMapping("/add-location")
+    public ResponseEntity<HttpResponse> addLocation(@RequestBody DeliveryDto deliveryDto, HttpSession httpSession) {
+        return response(CREATED, deliveryService.addLocation(deliveryDto, httpSession));
+    }
+
+    @PutMapping("/update-location/{deliveryId}")
+    public ResponseEntity<HttpResponse> updateLocation(@PathVariable long deliveryId,
+                                                       @RequestBody DeliveryDto deliveryDto, HttpSession httpSession) {
+        return response(OK, deliveryService.updateLocation(deliveryId, deliveryDto, httpSession));
     }
 }
